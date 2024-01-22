@@ -8,21 +8,25 @@ import java.awt.Component
 
 class TimerStatusBarWidget : StatusBarWidget, StatusBarWidget.TextPresentation {
     private var timeElapsed = 0
-    private val projectTimer = ProjectTimer()
+    private var projectTimer: ProjectTimer? = null
     private var statusBar: StatusBar? = null
 
-    init {
-        projectTimer.onTimeElapsed = { time ->
-            updateTime(time)
-            ApplicationManager.getApplication().invokeLater {
-                statusBar?.updateWidget(ID())
+    fun setup(project: Project, initialBranch: String, externalProjectTimer: ProjectTimer? = null) {
+        println("Widget setup called for branch: $initialBranch")
+        projectTimer = externalProjectTimer ?: ProjectTimer().apply {
+            onTimeElapsed = { time ->
+                println("onTimeElapsed callback set to: $onTimeElapsed") // Add this log
+                updateTime(time)
+                ApplicationManager.getApplication().invokeLater {
+                    statusBar?.updateWidget(ID())
+                    println("Widget updated")
+                }
+                println("Time elapsed callback invoked: $time seconds")
             }
+            setProject(project)
+            switchBranch(initialBranch)
+            println("Widget setup for branch: $initialBranch")
         }
-    }
-
-    fun setup(project: Project) {
-        projectTimer.setProject(project)
-        projectTimer.startTimer()
     }
 
     override fun ID() = "com.example.jiratimer.TimerStatusBarWidget"
@@ -32,7 +36,7 @@ class TimerStatusBarWidget : StatusBarWidget, StatusBarWidget.TextPresentation {
     }
 
     override fun dispose() {
-        projectTimer.stopTimer()
+        projectTimer?.stopTimer()
     }
 
     override fun getTooltipText() = "Time Elapsed"
@@ -40,8 +44,10 @@ class TimerStatusBarWidget : StatusBarWidget, StatusBarWidget.TextPresentation {
     override fun getText(): String {
         val minutes = timeElapsed / 60
         val seconds = timeElapsed % 60
+        println("Updating widget text display: ${minutes.formatTime()}:${seconds.formatTime()}")
         return "Timer: ${minutes.formatTime()}:${seconds.formatTime()}"
     }
+
 
     override fun getAlignment() = Component.CENTER_ALIGNMENT
 
@@ -50,6 +56,7 @@ class TimerStatusBarWidget : StatusBarWidget, StatusBarWidget.TextPresentation {
     }
 
     private fun updateTime(elapsed: Int) {
+        println("updateTime called with elapsed: $elapsed")
         timeElapsed = elapsed
     }
 
