@@ -11,22 +11,19 @@ class ProjectTimer(private var project: Project) {
     private var currentBranch = ""
     var onTimeElapsed: ((Int) -> Unit)? = null
 
-    /**
-     * Load the data if it exists.
-     */
     init {
         loadTimerData()
     }
 
     /**
-     * Set the project (in case of multiple projects).
+     * Set the current project (for the timer).
      */
     fun setProject(project: Project) {
         this.project = project
     }
 
     /**
-     * Switch the timer to a new branch
+     * Switch the active branch (for the timer).
      */
     fun switchBranch(newBranch: String) {
         stopTimer()
@@ -39,9 +36,6 @@ class ProjectTimer(private var project: Project) {
      */
     fun getTimeElapsedForBranch(branch: String): Int = timeElapsedMap.getOrDefault(branch, 0)
 
-    /**
-     * Start the timer
-     */
     private fun startTimer() {
         var timeElapsed = timeElapsedMap.getOrDefault(currentBranch, 0)
         job = CoroutineScope(Dispatchers.Main).launch {
@@ -56,7 +50,7 @@ class ProjectTimer(private var project: Project) {
     }
 
     /**
-     * Stop the job timer, and save data.
+     * Stop the timer.
      */
     fun stopTimer() {
         job?.cancel()
@@ -65,7 +59,8 @@ class ProjectTimer(private var project: Project) {
     }
 
     /**
-     * Load saved timer data from persistent storage on startup.
+     * Load the timer data from storage. Populates the timeElapsedMap with elapsed times
+     * for each branch that has been stored.
      */
     private fun loadTimerData() {
         val propertiesComponent = PropertiesComponent.getInstance()
@@ -81,19 +76,51 @@ class ProjectTimer(private var project: Project) {
     }
 
     /**
-     * Save timer data to persistent storage.
+     * Save the timer data to storage. Maps the branch names and their elapsed times
+     * for later use.
      */
     private fun saveTimerData() {
         val propertiesComponent = PropertiesComponent.getInstance()
         val keyPrefix = "project_timer_${project.name}"
 
-        // Save branch names to elapsed map
+        // Save branch names
         val branchNames = timeElapsedMap.keys.joinToString(",")
         propertiesComponent.setValue("$keyPrefix.branches", branchNames)
 
-        // Save elapsed times for each branch to elapsed map
+        // Save elapsed times for each branch
         timeElapsedMap.forEach { (branch, elapsedTime) ->
             propertiesComponent.setValue("$keyPrefix.$branch", elapsedTime.toString())
         }
+    }
+
+    /**
+     * Get the set of branches that have been stored.
+     */
+    fun getStoredBranches(): Set<String> {
+        val propertiesComponent = PropertiesComponent.getInstance()
+        val keyPrefix = "project_timer_${project.name}"
+        val branchNames = propertiesComponent.getValue("$keyPrefix.branches")
+
+        return if (!branchNames.isNullOrBlank()) {
+            branchNames.split(',').toSet()
+        } else {
+            emptySet()
+        }
+    }
+
+    /**
+     * Remove data associated with a specific branch.
+     */
+    fun removeBranchData(branch: String) {
+        val propertiesComponent = PropertiesComponent.getInstance()
+        val keyPrefix = "project_timer_${project.name}"
+
+        // Remove branch name first.
+        val storedBranches = getStoredBranches().toMutableSet()
+        storedBranches.remove(branch)
+        propertiesComponent.setValue("$keyPrefix.branches", storedBranches.joinToString(","))
+
+        // Remove time data.
+        propertiesComponent.unsetValue("$keyPrefix.$branch")
     }
 }

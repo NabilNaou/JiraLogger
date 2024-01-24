@@ -7,6 +7,8 @@ import com.intellij.openapi.wm.StatusBarWidgetFactory
 class TimerWidgetFactory : StatusBarWidgetFactory {
     // Map of ProjectTimers.
     private val projectTimers = mutableMapOf<Project, ProjectTimer>()
+    // Map for the cleanup handler (in case of multiple projects).
+    private val cleanupHandlers = mutableMapOf<Project, BranchCleanup>()
 
     /**
      * Identifier that we need for the widget.
@@ -23,12 +25,21 @@ class TimerWidgetFactory : StatusBarWidgetFactory {
      */
     override fun isAvailable(project: Project) = true
 
+
     /**
-     * Make a new status bar widget for the project.
+     * Make a new status bar widget for the project, and cleanup handler.
      */
     override fun createWidget(project: Project): StatusBarWidget {
         val widget = TimerStatusBarWidget(project)
         val projectTimer = projectTimers.getOrPut(project) { ProjectTimer(project) }
+
+        // Check if a cleanup handler already exists for this project - if not make new one and store in map.
+        val cleanupHandler = cleanupHandlers[project]
+        if (cleanupHandler == null) {
+            val newCleanupHandler = BranchCleanup(project, projectTimer, widget)
+            cleanupHandlers[project] = newCleanupHandler
+            newCleanupHandler.startCleanupScheduler()
+        }
 
         BranchSwitchDetector(project, projectTimer, widget)
 
