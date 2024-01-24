@@ -7,26 +7,22 @@ import com.intellij.openapi.wm.StatusBarWidget
 import java.awt.Component
 
 class TimerStatusBarWidget : StatusBarWidget, StatusBarWidget.TextPresentation {
-    private var timeElapsed = 0
     private var projectTimer: ProjectTimer? = null
     private var statusBar: StatusBar? = null
+    private var currentBranch: String = ""
+
+    private fun Int.formatTime() = this.toString().padStart(2, '0')
 
     fun setup(project: Project, initialBranch: String, externalProjectTimer: ProjectTimer? = null) {
-        println("Widget setup called for branch: $initialBranch")
-        projectTimer = externalProjectTimer ?: ProjectTimer().apply {
-            onTimeElapsed = { time ->
-                println("onTimeElapsed callback set to: $onTimeElapsed") // Add this log
-                updateTime(time)
-                ApplicationManager.getApplication().invokeLater {
-                    statusBar?.updateWidget(ID())
-                    println("Widget updated")
-                }
-                println("Time elapsed callback invoked: $time seconds")
+        projectTimer = externalProjectTimer ?: ProjectTimer()
+        projectTimer?.onTimeElapsed = { time ->
+            ApplicationManager.getApplication().invokeLater {
+                statusBar?.updateWidget(ID())
             }
-            setProject(project)
-            switchBranch(initialBranch)
-            println("Widget setup for branch: $initialBranch")
         }
+        projectTimer?.setProject(project)
+        projectTimer?.switchBranch(initialBranch)
+        statusBar?.updateWidget(ID())
     }
 
     override fun ID() = "com.example.jiratimer.TimerStatusBarWidget"
@@ -42,6 +38,7 @@ class TimerStatusBarWidget : StatusBarWidget, StatusBarWidget.TextPresentation {
     override fun getTooltipText() = "Time Elapsed"
 
     override fun getText(): String {
+        val timeElapsed = projectTimer?.getTimeElapsedForBranch(currentBranch) ?: 0
         val minutes = timeElapsed / 60
         val seconds = timeElapsed % 60
         println("Updating widget text display: ${minutes.formatTime()}:${seconds.formatTime()}")
@@ -54,11 +51,8 @@ class TimerStatusBarWidget : StatusBarWidget, StatusBarWidget.TextPresentation {
     override fun getPresentation(): StatusBarWidget.WidgetPresentation {
         return this
     }
-
-    private fun updateTime(elapsed: Int) {
-        println("updateTime called with elapsed: $elapsed")
-        timeElapsed = elapsed
+    fun onBranchChange(newBranch: String) {
+        currentBranch = newBranch
+        projectTimer?.switchBranch(newBranch)
     }
-
-    private fun Int.formatTime() = this.toString().padStart(2, '0')
 }

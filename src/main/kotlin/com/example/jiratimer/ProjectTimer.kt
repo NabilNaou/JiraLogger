@@ -20,6 +20,10 @@ class ProjectTimer() {
         startTimer()
     }
 
+    fun getTimeElapsedForBranch(branch: String): Int {
+        return timeElapsedMap[branch] ?: 0
+    }
+
     private fun startTimer() {
         var timeElapsed = timeElapsedMap.getOrDefault(currentBranch, 0)
         job = CoroutineScope(Dispatchers.Main).launch {
@@ -27,7 +31,7 @@ class ProjectTimer() {
                 timeElapsed++
                 timeElapsedMap[currentBranch] = timeElapsed
                 onTimeElapsed?.invoke(timeElapsed)
-                println("Timer is running for branch $currentBranch: $timeElapsed seconds")
+                println(timeElapsed);
                 delay(1000)
             }
         }
