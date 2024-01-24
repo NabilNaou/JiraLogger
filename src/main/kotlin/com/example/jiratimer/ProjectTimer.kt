@@ -4,6 +4,7 @@ import com.intellij.openapi.project.Project
 import kotlinx.coroutines.*
 
 class ProjectTimer(private var project: Project) {
+    private val SEC_DELAY: Long = 1000
     private var job: Job? = null
     private var timeElapsedMap = mutableMapOf<String, Int>()
     private var currentBranch = ""
@@ -19,9 +20,7 @@ class ProjectTimer(private var project: Project) {
         startTimer()
     }
 
-    fun getTimeElapsedForBranch(branch: String): Int {
-        return timeElapsedMap[branch] ?: 0
-    }
+    fun getTimeElapsedForBranch(branch: String): Int = timeElapsedMap.getOrDefault(branch, 0)
 
     private fun startTimer() {
         var timeElapsed = timeElapsedMap.getOrDefault(currentBranch, 0)
@@ -30,7 +29,7 @@ class ProjectTimer(private var project: Project) {
                 timeElapsed++
                 timeElapsedMap[currentBranch] = timeElapsed
                 onTimeElapsed?.invoke(timeElapsed)
-                delay(1000)
+                delay(SEC_DELAY)
             }
         }
     }
