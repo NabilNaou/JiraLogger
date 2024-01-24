@@ -3,8 +3,7 @@ package com.example.jiratimer
 import com.intellij.openapi.project.Project
 import kotlinx.coroutines.*
 
-class ProjectTimer() {
-    private lateinit var project: Project
+class ProjectTimer(private var project: Project) {
     private var job: Job? = null
     private var timeElapsedMap = mutableMapOf<String, Int>()
     private var currentBranch = ""
@@ -31,7 +30,6 @@ class ProjectTimer() {
                 timeElapsed++
                 timeElapsedMap[currentBranch] = timeElapsed
                 onTimeElapsed?.invoke(timeElapsed)
-                println(timeElapsed);
                 delay(1000)
             }
         }

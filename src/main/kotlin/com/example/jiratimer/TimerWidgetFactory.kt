@@ -13,8 +13,8 @@ class TimerWidgetFactory : StatusBarWidgetFactory {
     override fun isAvailable(project: Project) = true
 
     override fun createWidget(project: Project): StatusBarWidget {
-        val widget = TimerStatusBarWidget()
-        val projectTimer = projectTimers.getOrPut(project) { ProjectTimer() }
+        val widget = TimerStatusBarWidget(project)
+        val projectTimer = projectTimers.getOrPut(project) { ProjectTimer(project) }
 
         BranchSwitchDetector(project, projectTimer, widget)
 

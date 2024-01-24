@@ -6,22 +6,22 @@ import com.intellij.openapi.wm.StatusBar
 import com.intellij.openapi.wm.StatusBarWidget
 import java.awt.Component
 
-class TimerStatusBarWidget : StatusBarWidget, StatusBarWidget.TextPresentation {
-    private var projectTimer: ProjectTimer? = null
+class TimerStatusBarWidget(project: Project) : StatusBarWidget, StatusBarWidget.TextPresentation {
+    private var projectTimer: ProjectTimer = ProjectTimer(project)
     private var statusBar: StatusBar? = null
     private var currentBranch: String = ""
 
     private fun Int.formatTime() = this.toString().padStart(2, '0')
 
     fun setup(project: Project, initialBranch: String, externalProjectTimer: ProjectTimer? = null) {
-        projectTimer = externalProjectTimer ?: ProjectTimer()
-        projectTimer?.onTimeElapsed = { time ->
+        projectTimer = externalProjectTimer ?: ProjectTimer(project)
+        projectTimer.onTimeElapsed = {
             ApplicationManager.getApplication().invokeLater {
                 statusBar?.updateWidget(ID())
             }
         }
-        projectTimer?.setProject(project)
-        projectTimer?.switchBranch(initialBranch)
+        projectTimer.setProject(project)
+        projectTimer.switchBranch(initialBranch)
         statusBar?.updateWidget(ID())
     }
 
@@ -32,13 +32,13 @@ class TimerStatusBarWidget : StatusBarWidget, StatusBarWidget.TextPresentation {
     }
 
     override fun dispose() {
-        projectTimer?.stopTimer()
+        projectTimer.stopTimer()
     }
 
     override fun getTooltipText() = "Time Elapsed"
 
     override fun getText(): String {
-        val timeElapsed = projectTimer?.getTimeElapsedForBranch(currentBranch) ?: 0
+        val timeElapsed = projectTimer.getTimeElapsedForBranch(currentBranch)
         val minutes = timeElapsed / 60
         val seconds = timeElapsed % 60
         println("Updating widget text display: ${minutes.formatTime()}:${seconds.formatTime()}")
@@ -53,6 +53,6 @@ class TimerStatusBarWidget : StatusBarWidget, StatusBarWidget.TextPresentation {
     }
     fun onBranchChange(newBranch: String) {
         currentBranch = newBranch
-        projectTimer?.switchBranch(newBranch)
+        projectTimer.switchBranch(newBranch)
     }
 }
