@@ -13,6 +13,9 @@ class TimerStatusBarWidget(project: Project) : StatusBarWidget, StatusBarWidget.
 
     private fun Int.formatTime() = this.toString().padStart(2, '0')
 
+    /**
+     * Sets up the widget with an initial project, its branch, and timer.
+     */
     fun setup(project: Project, initialBranch: String, externalProjectTimer: ProjectTimer? = null) {
         projectTimer = externalProjectTimer ?: ProjectTimer(project)
         projectTimer.onTimeElapsed = {
@@ -51,6 +54,11 @@ class TimerStatusBarWidget(project: Project) : StatusBarWidget, StatusBarWidget.
     override fun getPresentation(): StatusBarWidget.WidgetPresentation {
         return this
     }
+
+    /**
+     * Callback function that is called when the branch changes.
+     * We change the currentbranch, and tell the timer to update to the new branch.
+     */
     fun onBranchChange(newBranch: String) {
         currentBranch = newBranch
         projectTimer.switchBranch(newBranch)
