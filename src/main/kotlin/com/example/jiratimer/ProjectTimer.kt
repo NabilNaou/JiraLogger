@@ -1,16 +1,19 @@
 package com.example.jiratimer
 
 import com.intellij.ide.util.PropertiesComponent
+import com.intellij.openapi.components.Service
 import com.intellij.openapi.project.Project
 import kotlinx.coroutines.*
-
+@Service(Service.Level.PROJECT)
 class ProjectTimer(private var project: Project) {
     private val SEC_DELAY: Long = 1000
     private var job: Job? = null
     private var timeElapsedMap = mutableMapOf<String, Int>()
-    private var currentBranch = ""
+    private var _currentBranch = ""
     var onTimeElapsed: ((Int) -> Unit)? = null
-
+    private val jiraApiClient = JiraApiClient("ATATT3xFfGF03EnHY-ZxFjrAhdB-tvP8FxILb8yqJQnvzsAG6VKNQg_c_IMNROOOxJPZhxAviEUtqIViWM4mhRFBV446eE6OuU8JEfu6i1y6crP6OqjjwNa4YpQtw3qYYPsfl8iXESZK7te0LjxAIjaU8IX2Nt7QSIJbr3pzmIqV5DC3S0B0mwM=76E858C6", "https://jiratimertest.atlassian.net")
+    val currentBranch: String
+        get() = _currentBranch
     init {
         loadTimerData()
     }
@@ -22,12 +25,22 @@ class ProjectTimer(private var project: Project) {
         this.project = project
     }
 
+    fun pushTimeToJira(issueId: String) {
+        val timeSpent = getTimeElapsedForBranch(currentBranch)
+        println(timeSpent)
+        println(currentBranch)
+        if (timeSpent > 0) {
+            jiraApiClient.logTime(issueId, timeSpent)
+        }
+    }
+
     /**
      * Switch the active branch (for the timer).
      */
     fun switchBranch(newBranch: String) {
         stopTimer()
-        currentBranch = newBranch
+        println(newBranch)
+        _currentBranch = newBranch
         startTimer()
     }
 

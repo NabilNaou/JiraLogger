@@ -26,14 +26,13 @@ class BranchSwitchDetector(private val project: Project, private val projectTime
         val manager = GitRepositoryManager.getInstance(project)
         val repositories = manager.repositories
         for (repo in repositories) {
-            val currentBranch = repo.currentBranch?.name ?: "No Branch"
+            val currentBranchName = repo.currentBranch?.name ?: "No Branch"
+            projectTimer.switchBranch(currentBranchName)
 
             if (!isInitialSetupDone) {
-                widget.setup(project, currentBranch, projectTimer)
+                widget.setup(project, currentBranchName, projectTimer)
                 isInitialSetupDone = true
             }
-
-            widget.onBranchChange(currentBranch)
         }
     }
 }

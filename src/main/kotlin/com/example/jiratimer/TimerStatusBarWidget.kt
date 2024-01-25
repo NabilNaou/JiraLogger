@@ -7,9 +7,8 @@ import com.intellij.openapi.wm.StatusBarWidget
 import java.awt.Component
 
 class TimerStatusBarWidget(project: Project) : StatusBarWidget, StatusBarWidget.TextPresentation {
-    private var projectTimer: ProjectTimer = ProjectTimer(project)
+    private var projectTimer: ProjectTimer = project.getService(ProjectTimer::class.java)
     private var statusBar: StatusBar? = null
-    private var currentBranch: String = ""
 
     private fun Int.formatTime() = this.toString().padStart(2, '0')
 
@@ -41,7 +40,7 @@ class TimerStatusBarWidget(project: Project) : StatusBarWidget, StatusBarWidget.
     override fun getTooltipText() = "Time Elapsed"
 
     override fun getText(): String {
-        val timeElapsed = projectTimer.getTimeElapsedForBranch(currentBranch)
+        val timeElapsed = projectTimer.getTimeElapsedForBranch(projectTimer.currentBranch)
         val minutes = timeElapsed / 60
         val seconds = timeElapsed % 60
         println("Updating widget text display: ${minutes.formatTime()}:${seconds.formatTime()}")
@@ -53,14 +52,5 @@ class TimerStatusBarWidget(project: Project) : StatusBarWidget, StatusBarWidget.
 
     override fun getPresentation(): StatusBarWidget.WidgetPresentation {
         return this
-    }
-
-    /**
-     * Callback function that is called when the branch changes.
-     * We change the currentbranch, and tell the timer to update to the new branch.
-     */
-    fun onBranchChange(newBranch: String) {
-        currentBranch = newBranch
-        projectTimer.switchBranch(newBranch)
     }
 }

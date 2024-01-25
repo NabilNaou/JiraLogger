@@ -32,6 +32,7 @@ class TimerWidgetFactory : StatusBarWidgetFactory {
     override fun createWidget(project: Project): StatusBarWidget {
         val widget = TimerStatusBarWidget(project)
         val projectTimer = projectTimers.getOrPut(project) { ProjectTimer(project) }
+        println(projectTimer)
 
         // Check if a cleanup handler already exists for this project - if not make new one and store in map.
         val cleanupHandler = cleanupHandlers[project]

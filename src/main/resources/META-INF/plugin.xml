@@ -26,7 +26,8 @@
     <!-- Extension points defined by the plugin.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
     <extensions defaultExtensionNs="com.intellij">
-        <statusBarWidgetFactory id="com.example.jiratimer.TimerStatusBarWidget"
+        <statusBarWidgetFactory id="com.example.jiratimer.TimerWidgetFactory"
                                 implementation="com.example.jiratimer.TimerWidgetFactory"/>
+        <checkinHandlerFactory id="com.example.jiratimer.GitPushDetectorFactory" implementation="com.example.jiratimer.GitPushDetectorFactory"/>
     </extensions>
 </idea-plugin>
