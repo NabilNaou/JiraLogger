@@ -6,10 +6,12 @@ import kotlinx.coroutines.*
 import java.util.concurrent.TimeUnit
 
 class BranchCleanup(private val project: Project, private val projectTimer: ProjectTimer, private val widget: TimerStatusBarWidget) {
-    private val cleanupIntervalDays = 3
+    private val cleanupIntervalHours = 2L
 
     /**
-     * Periodically check for branches to delete from our storage.
+     * Periodically check for branches to delete from our storage. Every 2 hours we
+     * get all branches locally and the ones stores in project timer. Delete ones that
+     * are not in our branches. TBD: Make persistent and every day(?).
      */
     fun startCleanupScheduler() {
         CoroutineScope(Dispatchers.Default).launch {
@@ -29,16 +31,12 @@ class BranchCleanup(private val project: Project, private val projectTimer: Proj
         val manager = GitRepositoryManager.getInstance(project)
         val repositories = manager.repositories
 
-        // Get a list of all local branch names from Git repos in project.
         val localBranches = repositories.flatMap { it.branches.localBranches.map { it.name } }
 
-        // Get the branches stored in your data storage
         val storedBranches = projectTimer.getStoredBranches()
 
-        // Identify branches that no longer exist locally but are still in storage
         val branchesToRemove = storedBranches.filter { it !in localBranches }
 
-        // Remove the associated data for the branches
         branchesToRemove.forEach { branch ->
             projectTimer.removeBranchData(branch)
         }
@@ -48,7 +46,7 @@ class BranchCleanup(private val project: Project, private val projectTimer: Proj
      * Delay until next cleanup session.
      */
     private suspend fun delayUntilNextCleanup() {
-        val intervalMillis = TimeUnit.DAYS.toMillis(cleanupIntervalDays.toLong())
+        val intervalMillis = TimeUnit.HOURS.toMillis(cleanupIntervalHours)
         delay(intervalMillis)
     }
 }
