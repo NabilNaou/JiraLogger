@@ -25,10 +25,8 @@ class ProjectTimer(private var project: Project) {
         this.project = project
     }
 
-    fun pushTimeToJira(issueId: String) {
-        val timeSpent = getTimeElapsedForBranch(currentBranch)
-        println(timeSpent)
-        println(currentBranch)
+    fun pushTimeToJira(issueId: String, branchName: String) {
+        val timeSpent = getTimeElapsedForBranch(branchName)
         if (timeSpent > 0) {
             jiraApiClient.logTime(issueId, timeSpent)
         }
@@ -39,7 +37,6 @@ class ProjectTimer(private var project: Project) {
      */
     fun switchBranch(newBranch: String) {
         stopTimer()
-        println(newBranch)
         _currentBranch = newBranch
         startTimer()
     }

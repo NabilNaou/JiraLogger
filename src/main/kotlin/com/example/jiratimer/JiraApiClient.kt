@@ -6,11 +6,13 @@ import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.util.Base64
+import java.util.concurrent.CompletableFuture
 
 class JiraApiClient(private val apiToken: String, private val jiraBaseUrl: String) {
 
     private val httpClient = HttpClient.newHttpClient()
-    fun logTime(issueId: String, timeSpentSeconds: Int) {
+
+    fun logTime(issueId: String, timeSpentSeconds: Int): CompletableFuture<HttpResponse<String>> {
         val uri = URI("$jiraBaseUrl/rest/api/3/issue/$issueId/worklog")
         val authHeader = "Basic ${Base64.getEncoder().encodeToString("$apiToken:".toByteArray())}"
         val payload = JSONObject().apply {
@@ -23,6 +25,12 @@ class JiraApiClient(private val apiToken: String, private val jiraBaseUrl: Strin
                 .POST(HttpRequest.BodyPublishers.ofString(payload))
                 .build()
 
-        val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
+        return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                .thenApply { response ->
+                    println("Response status code: ${response.statusCode()}")
+                    println("Response body: ${response.body()}")
+                    response
+                }
     }
 }
+

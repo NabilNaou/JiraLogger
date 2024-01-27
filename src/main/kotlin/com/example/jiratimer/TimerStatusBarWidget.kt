@@ -43,7 +43,6 @@ class TimerStatusBarWidget(project: Project) : StatusBarWidget, StatusBarWidget.
         val timeElapsed = projectTimer.getTimeElapsedForBranch(projectTimer.currentBranch)
         val minutes = timeElapsed / 60
         val seconds = timeElapsed % 60
-        println("Updating widget text display: ${minutes.formatTime()}:${seconds.formatTime()}")
         return "Timer: ${minutes.formatTime()}:${seconds.formatTime()}"
     }
 

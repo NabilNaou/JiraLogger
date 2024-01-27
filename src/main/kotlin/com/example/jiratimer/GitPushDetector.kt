@@ -13,8 +13,8 @@ class GitPushDetector(private val panel: CheckinProjectPanel) : CheckinHandler()
         val gitRepository = GitRepositoryManager.getInstance(panel.project).repositories.firstOrNull()
         val currentBranch = gitRepository?.currentBranch?.name
         val jiraIssueId = extractJiraIssueId(currentBranch)
-        if (jiraIssueId != null) {
-            projectTimer.pushTimeToJira(jiraIssueId)
+        if (jiraIssueId != null && currentBranch != null) {
+            projectTimer.pushTimeToJira(jiraIssueId, currentBranch)
         }
     }
 
