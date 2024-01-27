@@ -14,7 +14,7 @@ class JiraApiClient(private val apiToken: String, private val jiraBaseUrl: Strin
 
     fun logTime(issueId: String, timeSpentSeconds: Int): CompletableFuture<HttpResponse<String>> {
         val uri = URI("$jiraBaseUrl/rest/api/3/issue/$issueId/worklog")
-        val authHeader = "Basic ${Base64.getEncoder().encodeToString("$apiToken:".toByteArray())}"
+        val authHeader = "Basic ${Base64.getEncoder().encodeToString("kallie12345@gmail.com:$apiToken".toByteArray())}"
         val payload = JSONObject().apply {
             put("timeSpentSeconds", timeSpentSeconds)
         }.toString()
@@ -26,11 +26,5 @@ class JiraApiClient(private val apiToken: String, private val jiraBaseUrl: Strin
                 .build()
 
         return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
-                .thenApply { response ->
-                    println("Response status code: ${response.statusCode()}")
-                    println("Response body: ${response.body()}")
-                    response
-                }
     }
 }
-
