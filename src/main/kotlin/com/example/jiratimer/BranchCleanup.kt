@@ -24,7 +24,7 @@ class BranchCleanup(private val project: Project, private val projectTimer: Proj
     /**
      * Remove branches that no longer exist locally.
      * The flow is: fetching a list of all local branches, getting branches stored in
-     * [ProjectTimer] and comparing local branches. The removed branches
+     * [ProjectTimer] and comparing local branches from the earlier list. The outdated branches
      * are deleted to save storage.
      */
     private fun cleanup() {
@@ -40,8 +40,8 @@ class BranchCleanup(private val project: Project, private val projectTimer: Proj
     }
 
     /**
-     * Get a list of all local Git branches this is done by running the `git branch` command.
-     * As git4idea is incompatible.
+     * Get a list of all local Git branches with the git branch command.
+     * Note: git4idea is incompatible, so branch commands seemed like the only solution(?)
      */
     private fun getLocalGitBranches(): List<String> {
         val processBuilder = ProcessBuilder("git", "branch")
