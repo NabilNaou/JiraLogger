@@ -29,7 +29,7 @@ class BranchSwitchDetector(private val project: Project, private val projectTime
             val currentBranchName = repo.currentBranch?.name ?: "No Branch"
             projectTimer.switchBranch(currentBranchName)
             if (!isInitialSetupDone) {
-                widget.setup(project, currentBranchName, projectTimer)
+                widget.setup(project, currentBranchName)
                 isInitialSetupDone = true
             }
         }

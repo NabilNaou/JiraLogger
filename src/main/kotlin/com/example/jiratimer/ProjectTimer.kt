@@ -4,6 +4,8 @@ import com.intellij.ide.util.PropertiesComponent
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.project.Project
 import kotlinx.coroutines.*
+import java.util.concurrent.CompletableFuture
+
 @Service(Service.Level.PROJECT)
 class ProjectTimer(private var project: Project) {
     private val SEC_DELAY: Long = 1000
@@ -14,6 +16,7 @@ class ProjectTimer(private var project: Project) {
     private val jiraApiClient = JiraApiClient("ATATT3xFfGF03EnHY-ZxFjrAhdB-tvP8FxILb8yqJQnvzsAG6VKNQg_c_IMNROOOxJPZhxAviEUtqIViWM4mhRFBV446eE6OuU8JEfu6i1y6crP6OqjjwNa4YpQtw3qYYPsfl8iXESZK7te0LjxAIjaU8IX2Nt7QSIJbr3pzmIqV5DC3S0B0mwM=76E858C6", "https://jiratimertest.atlassian.net")
     val currentBranch: String
         get() = _currentBranch
+
     init {
         loadTimerData()
     }
@@ -25,11 +28,25 @@ class ProjectTimer(private var project: Project) {
         this.project = project
     }
 
-    fun pushTimeToJira(issueId: String, branchName: String) {
+    fun pushTimeToJira(issueId: String, branchName: String): CompletableFuture<Boolean> {
         val timeSpent = getTimeElapsedForBranch(branchName)
-        if (timeSpent > 0) {
+
+        return if (timeSpent > 0) {
             jiraApiClient.logTime(issueId, timeSpent)
+        } else {
+            CompletableFuture.completedFuture(false)
         }
+    }
+
+    /**
+     * Reset our time for specificed branch. Used for resetting after committing.
+     */
+    fun resetTimeForBranch(branch: String) {
+        stopTimer()
+        timeElapsedMap[branch] = 0
+        saveTimerData()
+        onTimeElapsed?.invoke(0)
+        startTimer()
     }
 
     /**
@@ -46,7 +63,12 @@ class ProjectTimer(private var project: Project) {
      */
     fun getTimeElapsedForBranch(branch: String): Int = timeElapsedMap.getOrDefault(branch, 0)
 
+    /**
+     * Start our timer, and start our coroutine for elapsing time.
+     */
     private fun startTimer() {
+        stopTimer()
+
         var timeElapsed = timeElapsedMap.getOrDefault(currentBranch, 0)
         job = CoroutineScope(Dispatchers.Main).launch {
             while (isActive) {
@@ -65,7 +87,6 @@ class ProjectTimer(private var project: Project) {
     fun stopTimer() {
         job?.cancel()
         job = null
-        saveTimerData()
     }
 
     /**
@@ -93,11 +114,9 @@ class ProjectTimer(private var project: Project) {
         val propertiesComponent = PropertiesComponent.getInstance()
         val keyPrefix = "project_timer_${project.name}"
 
-        // Save branch names
         val branchNames = timeElapsedMap.keys.joinToString(",")
         propertiesComponent.setValue("$keyPrefix.branches", branchNames)
 
-        // Save elapsed times for each branch
         timeElapsedMap.forEach { (branch, elapsedTime) ->
             propertiesComponent.setValue("$keyPrefix.$branch", elapsedTime.toString())
         }
