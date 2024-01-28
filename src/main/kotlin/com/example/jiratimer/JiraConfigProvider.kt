@@ -4,7 +4,7 @@ import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vcs.VcsConfigurableProvider
 
-class JiraVcsConfigurableProvider : VcsConfigurableProvider {
+class JiraConfigProvider : VcsConfigurableProvider {
     /**
      * Need this to make a configurable component.
      */
