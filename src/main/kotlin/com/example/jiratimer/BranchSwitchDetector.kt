@@ -1,37 +1,42 @@
 package com.example.jiratimer
 
-import git4idea.repo.GitRepositoryChangeListener
-import git4idea.repo.GitRepositoryManager
 import com.intellij.openapi.project.Project
-import git4idea.repo.GitRepository
+import java.util.Timer
+import java.util.TimerTask
+import java.io.BufferedReader
+import java.io.InputStreamReader
 
 class BranchSwitchDetector(private val project: Project, private val projectTimer: ProjectTimer, private val widget: TimerStatusBarWidget) {
-    private var isInitialSetupDone = false
+    private var currentBranchName: String? = null
 
     /**
-     * Initialize the detector, and subscribe to git events.
+     * Checks every 3 seconds; task; for changes.
      */
     init {
-        val messageBus = project.messageBus
-        messageBus.connect().subscribe(GitRepository.GIT_REPO_CHANGE, GitRepositoryChangeListener {
-            onRepositoryChange()
-        })
+        val timer = Timer()
+        timer.scheduleAtFixedRate(object : TimerTask() {
+            override fun run() {
+                checkForBranchChange()
+            }
+        }, 0, 3000)
     }
 
     /**
-     * Callback function that is called when the branch is changed.
-     * Updates timer widget based on the current branch.
+     * Check for changes in the Git branch and notify branch changes. This is done through git commands
+     * as git4idea is incompatible.
      */
-    private fun onRepositoryChange() {
-        val manager = GitRepositoryManager.getInstance(project)
-        val repositories = manager.repositories
-        for (repo in repositories) {
-            val currentBranchName = repo.currentBranch?.name ?: "No Branch"
-            projectTimer.switchBranch(currentBranchName)
-            if (!isInitialSetupDone) {
-                widget.setup(project, currentBranchName)
-                isInitialSetupDone = true
-            }
+    private fun checkForBranchChange() {
+        val processBuilder = ProcessBuilder("git", "rev-parse", "--abbrev-ref", "HEAD")
+        processBuilder.directory(project.basePath?.let { java.io.File(it) })
+        val process = processBuilder.start()
+        val reader = BufferedReader(InputStreamReader(process.inputStream))
+        val newBranchName = reader.readLine()
+        reader.close()
+
+        if (newBranchName != null && currentBranchName != newBranchName) {
+            currentBranchName = newBranchName
+            projectTimer.switchBranch(newBranchName)
+            widget.setup(project, newBranchName)
         }
     }
 }

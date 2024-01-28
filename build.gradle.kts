@@ -17,7 +17,6 @@ intellij {
     version.set("2023.1.5")
     type.set("IC") // Target IDE Platform
 
-    plugins.set(listOf("Git4Idea"))
 }
 
 tasks {

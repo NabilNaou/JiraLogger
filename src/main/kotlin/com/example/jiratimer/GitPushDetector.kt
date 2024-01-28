@@ -3,22 +3,18 @@ package com.example.jiratimer
 import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.vcs.checkin.CheckinHandler
 import com.intellij.openapi.vcs.CheckinProjectPanel
-import git4idea.repo.GitRepositoryManager
 
 class GitPushDetector(private val panel: CheckinProjectPanel) : CheckinHandler() {
     private val projectTimer: ProjectTimer = panel.project.getService(ProjectTimer::class.java)
 
-
     /**
-     * Get the current repo and branch. Get the time spent, and format it. We ask the user to verify and then
-     * send in.
+     * Get the current branch from ProjectTimer and proceed with the check-in process.
      */
     override fun checkinSuccessful() {
-        val gitRepository = GitRepositoryManager.getInstance(panel.project).repositories.firstOrNull()
-        val currentBranch = gitRepository?.currentBranch?.name
+        val currentBranch = projectTimer.currentBranch
         val jiraIssueId = extractJiraIssueId(currentBranch)
 
-        if (jiraIssueId != null && currentBranch != null) {
+        if (jiraIssueId != null && currentBranch.isNotEmpty()) {
             val timeSpentInSeconds = projectTimer.getTimeElapsedForBranch(currentBranch)
             val formattedTime = formatTime(timeSpentInSeconds)
             val editedTimeString = Messages.showInputDialog(
@@ -45,7 +41,7 @@ class GitPushDetector(private val panel: CheckinProjectPanel) : CheckinHandler()
     }
 
     /**
-     * Extract the ID from our branchname. Example pattern is SCRUM-1: or _ Test. Will extract SCRUM-1.
+     * Extract the ID from our branch name. Example pattern is SCRUM-1: or _ Test. Will extract SCRUM-1.
      */
     private fun extractJiraIssueId(branchName: String?): String? {
         if (branchName != null) {

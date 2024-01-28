@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="JiraTimer.main:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/JiraTimer_main_jar</output-path>
+    <root id="archive" name="JiraTimer.main.jar">
+      <element id="module-output" name="JiraTimer.main" />
+    </root>
+  </artifact>
+</component>
