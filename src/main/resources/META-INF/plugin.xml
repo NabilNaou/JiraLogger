@@ -5,17 +5,18 @@
 
     <!-- Public plugin name should be written in Title Case.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-name -->
-    <name>JiraTimer</name>
+    <name>Jira Automatic Logger</name>
 
     <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
-    <vendor email="support@placeholder.com" url="https://www.yourcompany.com">Placeholder</vendor>
+    <vendor email="nabilnaou@hotmail.com" url="www.nabilnaou.com">Jira Timer</vendor>
 
     <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
          Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
     <description><![CDATA[
-    Enter short description tag blabla placeholder<br>
-    <em>Hi</em>
+    This plugin makes time logging easier. To configure, go to Settings -> VCS -> Jira Time logger<br>
+    Insert your token, email, and url.
+    <em>After commiting, you can automatically log your time. All you need to do is verify/adjust the prompt.</em>
   ]]></description>
 
     <!-- Product and plugin compatibility requirements.
