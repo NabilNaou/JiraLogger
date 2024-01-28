@@ -5,7 +5,6 @@ import com.intellij.openapi.wm.StatusBarWidget
 import com.intellij.openapi.wm.StatusBarWidgetFactory
 
 class TimerWidgetFactory : StatusBarWidgetFactory {
-    // Map for the cleanup handler (in case of multiple projects).
     private val cleanupHandlers = mutableMapOf<Project, BranchCleanup>()
 
     /**

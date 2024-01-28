@@ -29,5 +29,6 @@
         <statusBarWidgetFactory id="com.example.jiratimer.TimerWidgetFactory"
                                 implementation="com.example.jiratimer.TimerWidgetFactory"/>
         <checkinHandlerFactory id="com.example.jiratimer.GitPushDetectorFactory" implementation="com.example.jiratimer.GitPushDetectorFactory"/>
+        <vcsConfigurableProvider implementation="com.example.jiratimer.JiraVcsConfigurableProvider"/>
     </extensions>
 </idea-plugin>

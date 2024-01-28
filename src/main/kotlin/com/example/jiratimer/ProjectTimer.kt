@@ -13,7 +13,6 @@ class ProjectTimer(private var project: Project) {
     private var timeElapsedMap = mutableMapOf<String, Int>()
     private var _currentBranch = ""
     var onTimeElapsed: ((Int) -> Unit)? = null
-    private val jiraApiClient = JiraApiClient("ATATT3xFfGF03EnHY-ZxFjrAhdB-tvP8FxILb8yqJQnvzsAG6VKNQg_c_IMNROOOxJPZhxAviEUtqIViWM4mhRFBV446eE6OuU8JEfu6i1y6crP6OqjjwNa4YpQtw3qYYPsfl8iXESZK7te0LjxAIjaU8IX2Nt7QSIJbr3pzmIqV5DC3S0B0mwM=76E858C6", "https://jiratimertest.atlassian.net")
     val currentBranch: String
         get() = _currentBranch
 
@@ -32,6 +31,7 @@ class ProjectTimer(private var project: Project) {
      * Push time to jira and convert minutes to seconds.
      */
     fun pushTimeToJira(issueId: String, editedTime: Int): CompletableFuture<Boolean> {
+        val jiraApiClient = JiraApiClient()
         return if (editedTime > 0) {
             jiraApiClient.logTime(issueId, editedTime * 60)
         } else {
