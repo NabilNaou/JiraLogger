@@ -1,5 +1,6 @@
 package com.example.jiratimer
 
+import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.vcs.checkin.CheckinHandler
 import com.intellij.openapi.vcs.CheckinProjectPanel
 import git4idea.repo.GitRepositoryManager
@@ -7,9 +8,10 @@ import git4idea.repo.GitRepositoryManager
 class GitPushDetector(private val panel: CheckinProjectPanel) : CheckinHandler() {
     private val projectTimer: ProjectTimer = panel.project.getService(ProjectTimer::class.java)
 
+
     /**
-     * Get the current repo, and current branch. Extract the ID from it and pass it all to pushTimeToJira
-     * for logging. After success, reset.
+     * Get the current repo and branch. Get the time spent, and format it. We ask the user to verify and then
+     * send in.
      */
     override fun checkinSuccessful() {
         val gitRepository = GitRepositoryManager.getInstance(panel.project).repositories.firstOrNull()
@@ -17,12 +19,29 @@ class GitPushDetector(private val panel: CheckinProjectPanel) : CheckinHandler()
         val jiraIssueId = extractJiraIssueId(currentBranch)
 
         if (jiraIssueId != null && currentBranch != null) {
-            projectTimer.pushTimeToJira(jiraIssueId, currentBranch).thenAccept { success ->
+            val timeSpentInSeconds = projectTimer.getTimeElapsedForBranch(currentBranch)
+            val formattedTime = formatTime(timeSpentInSeconds)
+            val editedTimeString = Messages.showInputDialog(
+                    panel.component,
+                    "Is this time spent correct? (in minutes)",
+                    "Confirm Time Spent",
+                    Messages.getQuestionIcon(),
+                    formattedTime,
+                    null
+            )
+            val editedTimeInt = editedTimeString?.toIntOrNull() ?: (timeSpentInSeconds / 60)
+
+            projectTimer.pushTimeToJira(jiraIssueId, editedTimeInt).thenAccept { success ->
                 if (success) {
                     projectTimer.resetTimeForBranch(currentBranch)
                 }
             }
         }
+    }
+
+    private fun formatTime(timeInSeconds: Int): String {
+        val minutes = timeInSeconds / 60
+        return minutes.toString()
     }
 
     /**

@@ -28,11 +28,12 @@ class ProjectTimer(private var project: Project) {
         this.project = project
     }
 
-    fun pushTimeToJira(issueId: String, branchName: String): CompletableFuture<Boolean> {
-        val timeSpent = getTimeElapsedForBranch(branchName)
-
-        return if (timeSpent > 0) {
-            jiraApiClient.logTime(issueId, timeSpent)
+    /**
+     * Push time to jira and convert minutes to seconds.
+     */
+    fun pushTimeToJira(issueId: String, editedTime: Int): CompletableFuture<Boolean> {
+        return if (editedTime > 0) {
+            jiraApiClient.logTime(issueId, editedTime * 60)
         } else {
             CompletableFuture.completedFuture(false)
         }
