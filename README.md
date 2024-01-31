@@ -1,3 +1,5 @@
+Note: This is a plugin for JetBrains IDE (Such as IntelliJ, PhpStorm, etc).
+
 This is a Jira Time Logger. This is a tool I made to make it easier to log time directly from your IDE to Jira. During my work hours, I noticed that my coworkers and I would often forget to log our hours in jira. With this extension, this can be automated, or used as a reminder.
 
 Features
